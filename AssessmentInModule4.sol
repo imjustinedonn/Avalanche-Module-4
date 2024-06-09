@@ -11,10 +11,20 @@ contract AssessmentInModule4 is ERC20 {
         OwnerAccountWallet = msg.sender;
     }
 
-    string[] DegenItems = ["Selection 1: Paymaya", "Selection 2: Gcash", "Selection 3: Paypal"];
+    string[] DegenItems = [
+        "AVAILABLE ITEMS IN STORE:", 
+        "EMERALD" ,
+        "DIAMOND" , 
+        "PLATINUM" , 
+        "----------------------" , 
+        "Equivalent Degen Token:" , 
+        "1 EMERALD = 100 DGN" , 
+        "1 DIAMOND = 500 DGN" , 
+        "1 PLATINUM = 1000 DGN"
+        ];
 
-    mapping (address => uint) public MoneyBalance;
-    mapping(address => mapping(string => uint256)) public MoneyAdded;
+    mapping (address WalletAccount => uint DGN) public MoneyBalance;
+    mapping(address WalletAccount=> mapping(string Items=> uint256 StoredAmount)) public RedeemedDegen;
 
     function Minting(address AccountWallet, uint256 DGN) public {
         require(msg.sender == OwnerAccountWallet, "Owner ownly have an access");
@@ -37,25 +47,33 @@ contract AssessmentInModule4 is ERC20 {
         MoneyBalance[receiver] += DGN;
     }
 
-    function DGNAvailableItem() public view returns (string memory, string memory, string memory) {
-        return (DegenItems[0], DegenItems[1], DegenItems[2]);
+    function DGNAvailableItem() public view returns (
+        string memory, string memory, string memory, string memory, 
+        string memory, string memory , string memory, string memory ,string memory) 
+        {
+        return (
+            DegenItems[0], DegenItems[1], DegenItems[2], DegenItems[3], 
+            DegenItems[4], DegenItems[5], DegenItems[6], DegenItems[7], DegenItems[8]
+            );
     }
 
-    function Redeeming(address AccountWallet, uint256 choose) public {
-        if (choose == 1) {
-            require(MoneyBalance[AccountWallet] >= 1500, "DGN Token in account is insufficient");
-            MoneyBalance[AccountWallet] -= 1500;
-            MoneyAdded[AccountWallet]["Paymaya"] += 1485;
-        } else if (choose == 2) {
-            require(MoneyBalance[AccountWallet] >= 3000, "DGN Token in account is insufficient");
-            MoneyBalance[AccountWallet] -= 3000;
-            MoneyAdded[AccountWallet]["Gcash"] += 2985;
-        } else if (choose == 3) {
-            require(MoneyBalance[AccountWallet] >= 5000, "DGN Token in account is insufficient");
-            MoneyBalance[AccountWallet] -= 5000;
-            MoneyAdded[AccountWallet]["Paypal"] += 4985;
+    function RedeemDegenToMoney(address AccountWallet, string memory ItemsChoosen, uint256 ItemsAmount) public {
+        uint256 degenamount;
+
+        if (keccak256(abi.encodePacked(DegenItems[1])) == keccak256(abi.encodePacked(ItemsChoosen))) {
+            degenamount = 100;
+        } else if (keccak256(abi.encodePacked(DegenItems[2])) == keccak256(abi.encodePacked(ItemsChoosen))) {
+            degenamount = 500;
+        } else if (keccak256(abi.encodePacked(DegenItems[3])) == keccak256(abi.encodePacked(ItemsChoosen))) {
+            degenamount = 1000;
         } else {
-            revert("Item not found, Choose 1, 2, 3 only!");
+            revert("Item not found, Only EMERALD, DIAMOND & PLATINUM are currently available!");
         }
+
+        uint256 total = ItemsAmount * degenamount;
+        require(MoneyBalance[AccountWallet] >= total, "DGN Token in account is insufficient");
+        
+        MoneyBalance[AccountWallet] -= total;
+        RedeemedDegen[AccountWallet][ItemsChoosen] += ItemsAmount;
     }
 }
